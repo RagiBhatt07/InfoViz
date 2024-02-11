@@ -33,6 +33,12 @@
    <!-- body -->
    <body class="main-layout">
       <script src = "script.js"></script>
+      <script src="plot.js"></script>
+
+      <!-- Adding SVG -->
+
+
+
             <div class="full_bg">
                <div class="slider_main">
                   <div class="container-fluid">
@@ -132,17 +138,19 @@
                <div class="col-md-6">
                   <div class="titlepage text_align_left">
                      <h2>Nutrient Mapping</h2>
-                     <p>
+                     <p>   <!-- Container for the rose chart SVG -->
+                     <svg id="roseChart" width="800" height="800"></svg>
                      </p>
                      <a class="read_more" href="about.html">Read More</a>
-                     <button onclick="filterData()">Filter Data</button>
-                     <button onclick="modifyDataValues()">Modify Values</button>
+                     <div id="tooltip" style="position: absolute; text-align: center; width: auto; height: auto; padding: 8px; font: 12px sans-serif; background: lightsteelblue; border: 0px; border-radius: 8px; pointer-events: none; opacity: 0;"></div>
+
+
 
                   </div>
                </div>
                <div class="col-md-6">
                   <div class="about_img text_align_center">
-                     <figure><img class="img_responsive" src="images/about.png" alt="#"/></figure>
+                     <!-- ADD here -->
                   </div>
                </div>
             </div>
@@ -150,7 +158,7 @@
       </div>
       <!-- end about -->
       <!-- quality -->
-      <div class="quality">
+      <!-- <div class="quality">
          <div class="container">
             <div class="row">
                <div class="col-md-12">
@@ -169,7 +177,7 @@
                </div>
             </div>
          </div>
-      </div>
+      </div> -->
       <!-- end quality -->
       <!-- contact -->
       <div class="contact">
@@ -195,7 +203,112 @@
                      </ul>
                  </section>
                
-                 
+                 <div id="visualization"></div>
+
+<!-- Dropdowns for selecting data categories -->
+<select id="row1"></select>
+<select id="row2"></select>
+
+<script>
+// Load data from a CSV file
+d3.csv("data/BeverageConsumptionModified.csv").then(function(data) {
+    // Once data is loaded, populate the dropdowns
+    const row1Select = document.getElementById('row1');
+    const row2Select = document.getElementById('row2');
+    data.forEach((row, index) => {
+        const option1 = document.createElement('option');
+        const option2 = document.createElement('option');
+        option1.value = option2.value = index;
+        option1.textContent = option2.textContent = `Row ${index + 1}: ${row['Type']}`;
+        row1Select.appendChild(option1);
+        row2Select.appendChild(option2);
+    });
+
+    // Set a different initial value for row2 to avoid duplicate initial selections
+    if (data.length > 1) {
+        row2Select.value = 1;
+    }
+
+    // Function to update visualization
+    function updateVisualization() {
+        const selectedIndex1 = row1Select.value;
+        const selectedIndex2 = row2Select.value;
+        const filteredData = [data[selectedIndex1], data[selectedIndex2]];
+
+        const svg = d3.select('#visualization').html('').append('svg')
+            .attr('width', 500)
+            .attr('height', 300);
+
+        const margin = {top: 40, right: 20, bottom: 30, left: 40},
+            width = +svg.attr("width") - margin.left - margin.right,
+            height = +svg.attr("height") - margin.top - margin.bottom,
+            g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleBand()
+            .rangeRound([0, width])
+            .padding(0.1)
+            .domain(filteredData.map(d => d.Type));
+
+        const y = d3.scaleLinear()
+            .rangeRound([height, 0])
+            .domain([0, d3.max(filteredData, d => +d.DailyBeverage)]);
+
+        g.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x));
+
+        g.append("g")
+            .attr("class", "axis axis--y")
+            .call(d3.axisLeft(y))
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", "0.71em")
+            .attr("text-anchor", "end")
+            .text("Frequency");
+
+        // Define an array of colors for the bars
+        const barColors = ["steelblue", "darkorange"];
+
+        g.selectAll(".bar")
+            .data(filteredData)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.Type))
+            .attr("y", d => y(+d.DailyBeverage))
+            .attr("width", x.bandwidth())
+            .attr("height", d => height - y(+d.DailyBeverage))
+            .attr("fill", (d, i) => barColors[i]) // Assign color based on index
+            .on("mouseover", function() {
+                d3.select(this)
+                    .style("fill-opacity", 0.7); // Make bar slightly transparent on hover
+            })
+            .on("mouseout", function() {
+                d3.select(this)
+                    .style("fill-opacity", 1); // Revert opacity on mouse out
+            });
+
+        // Append text labels directly on the bars
+        g.selectAll(".text")
+            .data(filteredData)
+            .enter().append("text")
+            .attr("class", "label")
+            .attr("x", (d) => x(d.Type) + x.bandwidth() / 2)
+            .attr("y", (d) => y(+d.DailyBeverage) + 15) // Position the label inside the bar, near the top
+            .attr("dy", ".75em")
+            .attr("text-anchor", "middle")
+            .text((d) => d.DailyBeverage);
+    }
+
+    // Initial update
+    updateVisualization();
+
+    // Event listeners for dropdown changes
+    row1Select.addEventListener('change', updateVisualization);
+    row2Select.addEventListener('change', updateVisualization);
+});
+</script>
 
                </div>
             </div>

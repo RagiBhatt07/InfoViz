@@ -1,0 +1,21 @@
+Project Link:
+Github - 
+
+Project Work:
+
+Most of the activities on the project were interdependent and hence it is quite difficult to pinpoint certain sections of the project done by either group member. HHowever, we have managed to narrow down certain stacks of tasks listed below:
+
+Ragi:
+Preprocessed the first dataset and implemented the website (styling, coding, and rendering) and the visualization in P5 for the nutrient content sketch. Also implemented the final website and parsed the dataset to extract meaningful stats to display and infer from. 
+
+
+Gabriel:
+
+Found, preprocessed, and worked on the second dataset. Also implemented the basis of the first visualization on nutrients as well as the second visualization on the comparison of the types of consumers of sweetened drinks.
+
+
+Future Work:
+The goal for the future is to refine these implementations by, for example, adding characters with visible visual features (for the category as well as the surplus of sugars) in place of bar charts for the second visualization.
+
+Improve the interactivity and markers for better inference.
+
